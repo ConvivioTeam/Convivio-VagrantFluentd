@@ -1,0 +1,85 @@
+---
+
+- name: install key
+  apt_key:
+    url: "{{ fluentd_apt_key_url }}"
+    state: present
+  register: fluentd_key_installed
+
+- name: add repos
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+    update_cache: no
+  when: fluentd_key_installed|success
+  register: fluentd_repo_installed
+  with_items: "{{ fluentd_apt_repositories }}"
+
+- name: update apt cache
+  apt:
+    update_cache: yes
+  when: fluentd_repo_installed|changed
+
+- name: install apt packages
+  apt:
+    name: "{{ item }}"
+    state: latest
+    install_recommends: no
+    update_cache: yes
+    cache_valid_time: 86400
+  when: fluentd_repo_installed|success
+  with_items: "{{ fluentd_packages }}"
+
+- name: install gem plugins
+  gem:
+    name: "{{ item }}"
+    executable: /opt/td-agent/embedded/bin/fluent-gem
+    state: latest
+    user_install: no
+  with_items: "{{ fluentd_plugins }}"
+  notify:
+    - restart fluentd
+  tags: fluentd_plugins
+
+- name: ensure config dir exists
+  file:
+    path: "{{ fluentd_config_path }}/conf.d"
+    state: directory
+    owner: "{{ fluentd_user }}"
+    group: "{{ fluentd_usergroup }}"
+    mode: 0744
+  tags: fluentd_config
+
+- name: ensure log dir exists and is writable
+  file:
+    path: "{{ fluentd_log_path }}"
+    state: directory
+    owner: "{{ fluentd_user }}"
+    group: "{{ fluentd_usergroup }}"
+    mode: 0744
+  tags: fluentd_config
+
+- name: config
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ fluentd_config_path }}/{{ item }}"
+    owner: "{{ fluentd_user }}"
+    group: "{{ fluentd_usergroup }}"
+    mode: 0644
+  with_items:
+    - conf.d/filter.conf
+    - conf.d/match.conf
+    - conf.d/source.conf
+    - conf.d/system.conf
+    - td-agent.conf
+  notify:
+    - restart fluentd
+  tags: fluentd_config
+
+- name: service start
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - "{{ fluentd_daemon }}"

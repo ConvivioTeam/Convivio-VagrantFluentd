@@ -1,0 +1,15 @@
+---
+- hosts: all
+  become: yes
+
+  vars_files:
+    - vars/main.yml
+    - ../default.config.yml
+
+  roles:
+    # Essential roles.
+    - { role: fluentdvm.hostname, when: hostname_configure }
+
+  tasks:
+    - import_tasks: tasks/sshd.yml
+    - import_tasks: tasks/extras.yml
