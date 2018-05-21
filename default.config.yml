@@ -17,6 +17,11 @@ vagrant_hostname: fluentdvm.test
 vagrant_machine_name: fluentdvm
 vagrant_ip: 192.168.66.66
 
+# Allow Fluentd VM to be accessed via a public network interface on your host.
+# Vagrant boxes are insecure by default, so be careful. You've been warned!
+# See: https://docs.vagrantup.com/v2/networking/public_network.html
+vagrant_public_ip: ""
+
 # A list of synced folders, with the keys 'local_path', 'destination', and
 # a 'type' of [nfs|rsync|smb] (leave empty for slow native shares).
 vagrant_synced_folders:
@@ -44,7 +49,76 @@ fluentdvm_ansible_version_min: '2.4'
 # Force use of ansible_local provisioner, even if Ansible is installed on host.
 force_ansible_local: false
 
+installed_extras:
+  - pimpmylog
+#  - xdebug
+
+# Add any extra apt or yum packages you would like installed.
+extra_packages:
+  - net-tools
+  - vim
+
 # Other configuration.
 known_hosts_path: ~/.ssh/known_hosts
 hostname_configure: true
 hostname_fqdn: "{{ vagrant_hostname }}"
+
+
+# fluentd install configuration
+fluentd_apt_key_url: https://packages.treasuredata.com/GPG-KEY-td-agent
+fluentd_apt_repositories:
+  - "deb http://packages.treasuredata.com/2/{{ ansible_distribution | lower }}/{{ ansible_distribution_release | lower }}/ {{ ansible_distribution_release | lower }} contrib"
+fluentd_packages:
+  - td-agent
+fluentd_daemon: td-agent
+fluentd_config_path: /etc/td-agent
+fluentd_log_path: /var/log/td-agent
+fluentd_plugins: []
+fluentd_user: td-agent
+fluentd_usergroup: td-agent
+
+# fluentd basic configuration
+fluentd_system_config:
+  process_name: ansible-fluentd
+
+fluentd_source_config:
+  - "@type": forward
+    port: 24224
+  - "@type": http
+    port: 9880
+
+#fluentd_match_config:
+#  - pattern: "myapp.access"
+#    "@type": file
+#    path: /var/log/td-agent/myapp.access
+#    time_slice_format: "%Y%m%d"
+#    time_slice_wait: 10m
+#    time_format: "%Y%m%dT%H%M%S%z"
+#
+#fluentd_filter_config:
+#  - name: myapp.access
+#    "@type": record_transformer
+#    record:
+#      host_param: '"#{Socket.gethostname}"'
+
+
+# Elasticsearch install configuration
+es_instance_name: "node1"
+es_data_dirs: "/opt/elasticsearch/data"
+es_log_dir: "/opt/elasticsearch/logs"
+es_config:
+  - node.name: "node1"
+  - cluster.name: "custom-cluster"
+  - discovery.zen.ping.unicast.hosts: "localhost:9301"
+  - http.port: 9201
+  - transport.tcp.port: 9301
+  - node.data: false
+  - node.master: true
+  - bootstrap.memory_lock: true
+es_scripts: false
+es_templates: false
+es_version_lock: false
+es_heap_size: 1g
+es_start_service: false
+es_plugins_reinstall: false
+es_api_port: 9201

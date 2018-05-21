@@ -9,7 +9,8 @@
   roles:
     # Essential roles.
     - { role: fluentdvm.hostname, when: hostname_configure }
-    - { role: jebovic.ansible-fluentd }
+    - { role: elastic.elasticsearch }
+    - { role: jebovic.fluentd }
 
   tasks:
     - import_tasks: tasks/sshd.yml
