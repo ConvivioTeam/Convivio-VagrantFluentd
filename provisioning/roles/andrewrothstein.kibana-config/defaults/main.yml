@@ -1,0 +1,25 @@
+---
+# defaults file for kibana-config
+kibana_config_dir: /usr/local/kibana
+
+kibana_config_port : 5601
+kibana_config_activate: True
+kibana_config_init: systemd
+
+#kibana_config_bind: '0.0.0.0'
+#kibana_config_server_basepath: /non-default-path
+#kibana_config_pki:
+#  cert: /path/to/server.crt
+#  key: /path/to/server.key
+
+kibana_config_es_url: http://localhost:9200
+
+#kibana_config_es_basic_auth:
+#  username: user
+#  password: pass
+
+#kibana_config_es_pki:
+#  ca: /path/to/cacert.pem
+#  cert: /path/to/client.crt
+#  key: /path/to/client.key
+#  verify: True

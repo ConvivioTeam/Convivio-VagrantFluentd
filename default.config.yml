@@ -29,7 +29,7 @@ vagrant_synced_folders:
   # any of the build_* settings are 'true'. By default the folder is set to
   # the fluentd-vm folder.
   - local_path: .
-    destination: /var/www/fluentdvm
+    destination: "{{ fluendvm_install_dir }}"
     type: nfs
     create: true
 
@@ -72,16 +72,15 @@ fluentd_apt_repositories:
 fluentd_packages:
   - td-agent
 
-# fluentd additional plugins
-fluentd_plugins:
-  - fluent-plugin-elasticsearch
-
 fluentd_daemon: td-agent
 fluentd_config_path: /etc/td-agent
 fluentd_log_path: /var/log/td-agent
-fluentd_plugins: []
 fluentd_user: td-agent
 fluentd_usergroup: td-agent
+
+# fluentd additional plugins
+fluentd_plugins:
+  - fluent-plugin-elasticsearch
 
 # fluentd basic configuration
 fluentd_system_config:
@@ -102,7 +101,7 @@ fluentd_match_config:
     "@type": elasticsearch
     host: localhost
     port: 9201
-    type_name: nginx_access
+    type_name: "{{ fluentd_app_logstash_prefix }}"
     logstash_format: "true"
     logstash_prefix: "{{ fluentd_app_logstash_prefix }}"
 
@@ -142,3 +141,74 @@ es_heap_size: 1g
 es_start_service: false
 es_plugins_reinstall: false
 es_api_port: 9201
+
+# Kibana install configuration.
+kibana_install: true
+kibana_config_dir: /usr/local/kibana/config
+
+kibana_config_port : 5601
+kibana_config_activate: True
+kibana_config_init: systemd
+
+#kibana_config_bind: '0.0.0.0'
+#kibana_config_server_basepath: /non-default-path
+#kibana_config_pki:
+#  cert: /path/to/server.crt
+#  key: /path/to/server.key
+
+kibana_config_es_url: "http://localhost:{{ es_api_port }}"
+
+#kibana_config_es_basic_auth:
+#  username: user
+#  password: pass
+
+#kibana_config_es_pki:
+#  ca: /path/to/cacert.pem
+#  cert: /path/to/client.crt
+#  key: /path/to/client.key
+#  verify: True
+
+fluentdvm_domain: "{{ vagrant_hostname }}"
+fluendvm_install_dir: "/var/www/fluentdvm"
+fluentdvm_core_path: "{{ fluendvm_install_dir }}/web"
+
+# The web server software to use. Can be either 'apache' or 'nginx'.
+fluentdvm_webserver: "nginx"
+
+# Nginx hosts. Each site will get a server entry using the configuration defined
+# here. Set the 'is_php' property for document roots that contain PHP apps like
+# Drupal.
+nginx_vhosts:
+  - server_name: "{{ fluentdvm_domain }} www.{{ fluentdvm_domain }}"
+    root: "{{ fluentdvm_core_path }}"
+
+# Helper variable to configure the PHP-FPM connection for each Apache
+# VirtualHost in the `apache_vhosts` list.
+apache_vhost_php_fpm_parameters: |
+    <FilesMatch \.php$>
+      SetHandler "proxy:fcgi://{{ php_fpm_listen }}"
+    </FilesMatch>
+
+# Apache VirtualHosts. Add one for each site you are running inside the VM. For
+# multisite deployments, you can point multiple servernames at one documentroot.
+# View the geerlingguy.apache Ansible Role README for more options.
+apache_vhosts: []
+#  - servername: "{{ fluentdvm_domain }}"
+#    serveralias: "www.{{ fluentdvm_domain }}"
+#    documentroot: "{{ fluentdvm_core_path }}"
+#    extra_parameters: "{{ apache_vhost_php_fpm_parameters }}"
+
+apache_packages_state: latest
+apache_remove_default_vhost: true
+apache_mods_enabled:
+  - expires.load
+  - headers.load
+  - ssl.load
+  - rewrite.load
+  - proxy.load
+  - proxy_fcgi.load
+
+# Other configuration.
+known_hosts_path: ~/.ssh/known_hosts
+hostname_configure: true
+hostname_fqdn: "{{ vagrant_hostname }}"

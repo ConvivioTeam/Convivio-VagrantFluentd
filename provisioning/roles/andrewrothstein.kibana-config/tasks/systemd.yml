@@ -1,0 +1,22 @@
+---
+- name: install systemd service...
+  become: yes
+  become_user: root
+  with_items:
+    - f: kibana.service
+  template: 
+    src: '{{item.f}}.j2'
+    dest: '{{item.d|default("/etc/systemd/system")}}/{{item.f}}'
+    mode: '{{item.m|default("0644")}}'
+  register: kibana_config_service_updated
+
+- name: systemctl daemon-reload
+  command: systemctl daemon-reload
+  when: kibana_config_activate and kibana_config_service_updated|changed
+
+- name: activate kibana service...
+  when: kibana_config_activate
+  service:
+    name: kibana
+    state: started
+    enabled: yes

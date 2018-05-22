@@ -11,6 +11,11 @@
     - { role: fluentdvm.hostname, when: hostname_configure }
     - { role: elastic.elasticsearch }
     - { role: jebovic.fluentd }
+    - { role: andrewrothstein.unarchive-deps }
+    - { role: andrewrothstein.kibana, when: kibana_install }
+    - { role: andrewrothstein.kibana-config, when: kibana_install }
+    - { role: geerlingguy.nginx, when: fluentdvm_webserver == 'nginx', tags: ['webserver']  }
+    - { role: geerlingguy.apache, when: fluentdvm_webserver == 'apache', tags: ['webserver'] }
 
   tasks:
     - import_tasks: tasks/sshd.yml
