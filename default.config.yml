@@ -57,6 +57,7 @@ installed_extras:
 extra_packages:
   - net-tools
   - vim
+  - ruby
 
 # Other configuration.
 known_hosts_path: ~/.ssh/known_hosts
@@ -70,6 +71,11 @@ fluentd_apt_repositories:
   - "deb http://packages.treasuredata.com/2/{{ ansible_distribution | lower }}/{{ ansible_distribution_release | lower }}/ {{ ansible_distribution_release | lower }} contrib"
 fluentd_packages:
   - td-agent
+
+# fluentd additional plugins
+fluentd_plugins:
+  - fluent-plugin-elasticsearch
+
 fluentd_daemon: td-agent
 fluentd_config_path: /etc/td-agent
 fluentd_log_path: /var/log/td-agent
@@ -87,6 +93,19 @@ fluentd_source_config:
   - "@type": http
     port: 9880
 
+fluentd_app_log_pattern: "*myapp.log"
+fluentd_app_logstash_prefix: "myapp_log"
+
+# Send nginx.access tagged messages to elasticsearch
+fluentd_match_config:
+  - pattern: "{{ fluentd_app_log_pattern }}"
+    "@type": elasticsearch
+    host: localhost
+    port: 9201
+    type_name: nginx_access
+    logstash_format: "true"
+    logstash_prefix: "{{ fluentd_app_logstash_prefix }}"
+
 #fluentd_match_config:
 #  - pattern: "myapp.access"
 #    "@type": file
@@ -95,11 +114,12 @@ fluentd_source_config:
 #    time_slice_wait: 10m
 #    time_format: "%Y%m%dT%H%M%S%z"
 #
-#fluentd_filter_config:
-#  - name: myapp.access
-#    "@type": record_transformer
-#    record:
-#      host_param: '"#{Socket.gethostname}"'
+
+fluentd_filter_config:
+  - name: "{{ fluentd_app_log_pattern }}"
+    "@type": record_transformer
+    record:
+      host_param: '"#{Socket.gethostname}"'
 
 
 # Elasticsearch install configuration
