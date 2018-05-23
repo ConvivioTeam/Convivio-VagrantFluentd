@@ -1,0 +1,39 @@
+---
+galaxy_info:
+  author: Andrew Rothstein
+  description: elasticsearch role
+  company: BlackRock
+  license:
+    - MIT
+  min_ansible_version: 2.0
+  platforms:
+    - name: EL
+      versions:
+        - all
+    - name: Fedora
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - jessie
+    - name: MacOSX
+      versions:
+        - all
+    - name: Alpine
+      versions:
+        - all
+  galaxy_tags:
+    - text
+    - index
+    - REST
+
+dependencies:
+  - role: andrewrothstein.bash
+    version: v1.1.1
+  - role: andrewrothstein.unarchive-deps
+    version: v1.0.9
+  - role: andrewrothstein.java-oracle-jre
+    version: v2.0.6

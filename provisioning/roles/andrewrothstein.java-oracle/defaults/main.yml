@@ -1,0 +1,23 @@
+---
+# defaults file for java-oracle
+
+# jre or jdk
+java_oracle_prefix: jre
+
+java_oracle_mirror: http://download.oracle.com/otn-pub/java/jdk
+java_oracle_platform: linux-x64
+
+java_oracle_ver:
+  major: 8
+  minor: 0
+  patch: 172
+  post_patch: b11
+  uuid: 'a58eab1ec242421181065cdc37240b08'
+  checksums:
+    jre:
+      'linux-x64': sha256:f08f25aec2bdc86138ccba8fd5b904451e3afa1d24a88c85f28c2d84bfd45bad
+    jdk:
+      'linux-x64': sha256:28a00b9400b6913563553e09e8024c286b506d8523334c93ddec6c9ec7e9d346
+
+java_oracle_parent_install_dir: /usr/local
+

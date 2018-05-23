@@ -14,7 +14,7 @@
   become: yes
   become_user: root
   file:
-    path: '{{kibana_config_dir}}'
+    path: '{{kibana_config_dir}}/config'
     state: directory
     mode: 0755
         
@@ -25,7 +25,7 @@
     - f: kibana.yml
   template:
     src: '{{item.f}}.j2'
-    dest: '{{item.d|default(kibana_config_dir)}}/{{item.f}}'
+    dest: '{{item.d|default(kibana_config_dir)}}/config/{{item.f}}'
     mode: '{{item.d|default("0644")}}'
 
 - include_tasks: '{{kibana_config_init|default("systemd")}}.yml'

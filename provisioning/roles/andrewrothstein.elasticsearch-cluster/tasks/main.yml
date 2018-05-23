@@ -1,0 +1,36 @@
+---
+- name: create elasticsearch group
+  become: yes
+  become_user: root
+  group:
+    name: '{{elasticsearch_cluster_groupname}}'
+    state: present
+
+- name: create elasticsearch user
+  become: yes
+  become_user: root
+  user:
+    name: '{{elasticsearch_cluster_username}}'
+    group: '{{elasticsearch_cluster_groupname}}'
+    home: '{{elasticsearch_dir}}'
+
+- name: make config dir
+  become: yes
+  become_user: root
+  file:
+    path: '{{elasticsearch_cluster_config_dir}}'
+    state: directory
+    mode: 0755
+
+- name: install elasticsearch.yml
+  become: yes
+  become_user: root
+  with_items:
+    - f: elasticsearch.yml
+  template:
+    src: '{{item.f}}.j2'
+    dest: '{{item.d|default(elasticsearch_cluster_config_dir)}}/{{item.f}}'
+    mode: '{{item.m|default("0644")}}'
+
+- include: '{{elasticsearch_supervisor|default("systemd")}}.yml'
+
