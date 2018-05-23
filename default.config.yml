@@ -139,12 +139,12 @@ elasticsearch_cluster_supervisor: systemd
 
 # Kibana install configuration.
 kibana_install: true
-kibana_version: "6.2.4"
+kibana_version: "4.6"
 
 kibana_server_port: 5601
 kibana_server_host: "0.0.0.0"
 
-kibana_elasticsearch_url: "http://{{ elasticsearch_network_host }}: {{ elasticsearch_http_port }}"
+kibana_elasticsearch_url: "http://{{ elasticsearch_network_host }}:{{ elasticsearch_http_port }}"
 
 
 fluentdvm_domain: "{{ vagrant_hostname }}"
