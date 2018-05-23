@@ -58,6 +58,7 @@ extra_packages:
   - net-tools
   - vim
   - ruby
+  - language-pack-en
 
 # Other configuration.
 known_hosts_path: ~/.ssh/known_hosts
@@ -100,7 +101,7 @@ fluentd_match_config:
   - pattern: "{{ fluentd_app_log_pattern }}"
     "@type": elasticsearch
     host: localhost
-    port: 9201
+    port: "{{ elasticsearch_cluster_http }}"
     type_name: "{{ fluentd_app_logstash_prefix }}"
     logstash_format: "true"
     logstash_prefix: "{{ fluentd_app_logstash_prefix }}"
@@ -122,32 +123,53 @@ fluentd_filter_config:
 
 
 # Elasticsearch install configuration
-es_instance_name: "node1"
-es_data_dirs: "/opt/elasticsearch/data"
-es_log_dir: "/opt/elasticsearch/logs"
-es_config:
-  - node.name: "node1"
-  - cluster.name: "custom-cluster"
-  - discovery.zen.ping.unicast.hosts: "localhost:9301"
-  - http.port: 9201
-  - transport.tcp.port: 9301
-  - node.data: false
-  - node.master: true
-  - bootstrap.memory_lock: true
-es_scripts: false
-es_templates: false
-es_version_lock: false
-es_heap_size: 1g
-es_start_service: false
-es_plugins_reinstall: false
-es_api_port: 9201
+elasticsearch_install: true
+elasticsearch_ver : '6.2.4'
+elasticsearch_parent_install_dir: /usr/local
+elasticsearch_cluster_username: elasticsearch
+elasticsearch_cluster_groupname: elasticsearch
+
+elasticsearch_dir: /usr/local/elasticsearch
+
+#elasticsearch_cluster_name : elasticsearch-cluster-name
+
+#elasticsearch_cluster_node:
+#  rack : r1
+#  name: node-name-qwert
+
+elasticsearch_cluster_network:
+  host: '127.0.0.1'
+
+elasticsearch_cluster_http:
+  port : 9200
+
+elasticsearch_cluster_gateway:
+  recover_after_nodes: 3
+
+elasticsearch_cluster_paths:
+  data: /var/log/elasticsearch
+  logs: /var/lib/elasticsearch
+
+elasticsearch_cluster_hosts:
+  ty: static
+  hosts:
+    - localhost
+
+# also supports finding the hosts from a group/inventory
+#elasticsearch_cluster_hosts:
+#  ty: group
+#  group: elasticsearch
+
+elasticsearch_cluster_activate: true
+elasticsearch_cluster_supervisor: systemd
 
 # Kibana install configuration.
 kibana_install: true
-kibana_config_dir: /usr/local/kibana/config
-
+kibana_ver : '6.2.4'
+kibana_platform : 'linux-x86_64'
+kibana_config_dir: '/usr/local/kibana'
 kibana_config_port : 5601
-kibana_config_activate: True
+kibana_config_activate: true
 kibana_config_init: systemd
 
 #kibana_config_bind: '0.0.0.0'
@@ -156,7 +178,7 @@ kibana_config_init: systemd
 #  cert: /path/to/server.crt
 #  key: /path/to/server.key
 
-kibana_config_es_url: "http://localhost:{{ es_api_port }}"
+kibana_config_es_url: "http://localhost:{{ elasticsearch_cluster_http.port }}"
 
 #kibana_config_es_basic_auth:
 #  username: user
@@ -181,6 +203,12 @@ fluentdvm_webserver: "nginx"
 nginx_vhosts:
   - server_name: "{{ fluentdvm_domain }} www.{{ fluentdvm_domain }}"
     root: "{{ fluentdvm_core_path }}"
+  - server_name: "kibana.{{ fluentdvm_domain }}"
+    extra_parameters: |
+      location / {
+        proxy_pass http://localhost:5601;
+        proxy_read_timeout 100;
+      }
 
 # Helper variable to configure the PHP-FPM connection for each Apache
 # VirtualHost in the `apache_vhosts` list.
