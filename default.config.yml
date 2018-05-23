@@ -172,6 +172,12 @@ nginx_vhosts:
         proxy_pass http://localhost:9200;
         proxy_read_timeout 100;
       }
+  - server_name: "fluentd.{{ fluentdvm_domain }}"
+    extra_parameters: |
+      location / {
+        proxy_pass http://localhost:9880;
+        proxy_read_timeout 100;
+      }
 
 # Helper variable to configure the PHP-FPM connection for each Apache
 # VirtualHost in the `apache_vhosts` list.

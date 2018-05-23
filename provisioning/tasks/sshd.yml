@@ -23,7 +23,7 @@
   connection: local
   become: no
 
-- name: Copy known_hosts file from host into Drupal VM.
+- name: Copy known_hosts file from host into Fluentd VM.
   copy:
     src: "{{ known_hosts_path | default('~/.ssh/known_hosts') }}"
     dest: ~/.ssh/known_hosts
