@@ -100,8 +100,8 @@ fluentd_app_logstash_prefix: "myapp_log"
 fluentd_match_config:
   - pattern: "{{ fluentd_app_log_pattern }}"
     "@type": elasticsearch
-    host: localhost
-    port: "{{ elasticsearch_cluster_http }}"
+    host: "{{ elasticsearch_network_host }}"
+    port: "{{ elasticsearch_http_port }}"
     type_name: "{{ fluentd_app_logstash_prefix }}"
     logstash_format: "true"
     logstash_prefix: "{{ fluentd_app_logstash_prefix }}"
@@ -124,36 +124,10 @@ fluentd_filter_config:
 
 # Elasticsearch install configuration
 elasticsearch_install: true
-elasticsearch_ver : '6.2.4'
-elasticsearch_parent_install_dir: /usr/local
-elasticsearch_cluster_username: elasticsearch
-elasticsearch_cluster_groupname: elasticsearch
-
-elasticsearch_dir: /usr/local/elasticsearch
-
-#elasticsearch_cluster_name : elasticsearch-cluster-name
-
-#elasticsearch_cluster_node:
-#  rack : r1
-#  name: node-name-qwert
-
-elasticsearch_cluster_network:
-  host: '127.0.0.1'
-
-elasticsearch_cluster_http:
-  port : 9200
-
-elasticsearch_cluster_gateway:
-  recover_after_nodes: 3
-
-elasticsearch_cluster_paths:
-  data: /var/log/elasticsearch
-  logs: /var/lib/elasticsearch
-
-elasticsearch_cluster_hosts:
-  ty: static
-  hosts:
-    - localhost
+elasticsearch_network_host: localhost
+elasticsearch_http_port: 9200
+elasticsearch_script_inline: true
+elasticsearch_script_indexed: true
 
 # also supports finding the hosts from a group/inventory
 #elasticsearch_cluster_hosts:
@@ -165,30 +139,13 @@ elasticsearch_cluster_supervisor: systemd
 
 # Kibana install configuration.
 kibana_install: true
-kibana_ver : '6.2.4'
-kibana_platform : 'linux-x86_64'
-kibana_config_dir: '/usr/local/kibana'
-kibana_config_port : 5601
-kibana_config_activate: true
-kibana_config_init: systemd
+kibana_version: "6.2.4"
 
-#kibana_config_bind: '0.0.0.0'
-#kibana_config_server_basepath: /non-default-path
-#kibana_config_pki:
-#  cert: /path/to/server.crt
-#  key: /path/to/server.key
+kibana_server_port: 5601
+kibana_server_host: "0.0.0.0"
 
-kibana_config_es_url: "http://localhost:{{ elasticsearch_cluster_http.port }}"
+kibana_elasticsearch_url: "http://{{ elasticsearch_network_host }}: {{ elasticsearch_http_port }}"
 
-#kibana_config_es_basic_auth:
-#  username: user
-#  password: pass
-
-#kibana_config_es_pki:
-#  ca: /path/to/cacert.pem
-#  cert: /path/to/client.crt
-#  key: /path/to/client.key
-#  verify: True
 
 fluentdvm_domain: "{{ vagrant_hostname }}"
 fluendvm_install_dir: "/var/www/fluentdvm"
@@ -207,6 +164,12 @@ nginx_vhosts:
     extra_parameters: |
       location / {
         proxy_pass http://localhost:5601;
+        proxy_read_timeout 100;
+      }
+  - server_name: "elasticsearch.{{ fluentdvm_domain }}"
+    extra_parameters: |
+      location / {
+        proxy_pass http://localhost:9200;
         proxy_read_timeout 100;
       }
 

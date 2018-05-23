@@ -9,14 +9,10 @@
   roles:
     # Essential roles.
     - { role: fluentdvm.hostname, when: hostname_configure }
-    - { role: andrewrothstein.unarchive-deps, when: elasticsearch_install or kibana_install}
-    - { role: andrewrothstein.java-oracle, when: elasticsearch_install }
-    - { role: andrewrothstein.java-oracle-jre, when: elasticsearch_install }
-    - { role: andrewrothstein.elasticsearch, when: elasticsearch_install }
-    - { role: andrewrothstein.elasticsearch-cluster, when: elasticsearch_install }
+    - { role: geerlingguy.java, when: elasticsearch_install }
+    - { role: geerlingguy.elasticsearch, when: elasticsearch_install }
     - { role: jebovic.fluentd }
-    - { role: andrewrothstein.kibana, when: kibana_install }
-    - { role: andrewrothstein.kibana-config, when: kibana_install }
+    - { role: geerlingguy.kibana, when: kibana_install }
     - { role: geerlingguy.nginx, when: fluentdvm_webserver == 'nginx', tags: ['webserver']  }
     - { role: geerlingguy.apache, when: fluentdvm_webserver == 'apache', tags: ['webserver'] }
 

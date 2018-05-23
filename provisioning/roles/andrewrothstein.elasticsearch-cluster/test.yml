@@ -1,5 +1,0 @@
----
-- hosts: all
-  roles:
-    - role: '{{playbook_dir}}'
-      elasticsearch_cluster_activate: False
