@@ -59,6 +59,7 @@ extra_packages:
   - vim
   - ruby
   - language-pack-en
+  - build-essential
 
 # Other configuration.
 known_hosts_path: ~/.ssh/known_hosts

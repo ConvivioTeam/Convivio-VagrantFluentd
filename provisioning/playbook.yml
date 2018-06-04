@@ -7,7 +7,8 @@
     - ../default.config.yml
 
   roles:
-    # Essential roles.
+    # Essential roles
+    - { role: common }
     - { role: fluentdvm.hostname, when: hostname_configure }
     - { role: geerlingguy.java, when: elasticsearch_install }
     - { role: geerlingguy.elasticsearch, when: elasticsearch_install }
@@ -15,7 +16,3 @@
     - { role: geerlingguy.kibana, when: kibana_install }
     - { role: geerlingguy.nginx, when: fluentdvm_webserver == 'nginx', tags: ['webserver']  }
     - { role: geerlingguy.apache, when: fluentdvm_webserver == 'apache', tags: ['webserver'] }
-
-  tasks:
-    - import_tasks: tasks/sshd.yml
-    - import_tasks: tasks/extras.yml
